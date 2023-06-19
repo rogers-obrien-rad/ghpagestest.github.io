@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>My Page</title>
+    <script src="https://alcdn.msauth.net/browser/2.13.1/js/msal-browser.min.js"></script>
     <style>
         .menu {
             display: flex;
@@ -34,12 +35,12 @@
     </style>
 </head>
 <body>
+    <div id="greeting" style="text-align: center;"></div>
+
     <div class="menu">
-        <button>Button 1</button>
-        <button>Button 2</button>
-        <button>Button 3</button>
-        <button>Button 4</button>
-        <button>Button 5</button>
+        <button id="login">Log In</button>
+        <button id="logout">Log Out</button>
+        <!-- Add your additional buttons here -->
     </div>
 
     <img src="your-image-url" class="full-width-image" alt="Full screen image">
@@ -53,5 +54,70 @@
         <div class="column"></div>
         <div class="column"></div>
     </div>
+
+    <script>
+        const msalConfig = {
+            auth: {
+                clientId: '4e33a7bf-6b73-4038-8eee-d411867a951c', // this is the Application (client) ID of your registered Azure application
+                authority: 'https://login.microsoftonline.com/0c86cb28-8440-4de3-837a-3d05a1725da1', // replace 'your-tenant-id' with your Azure AD tenant ID
+                redirectUri: 'https://rogers-obrien-rad.github.io/ghpagestest.github.io/', // replace with your app's redirect URI
+            },
+            cache: {
+                cacheLocation: "sessionStorage", 
+                storeAuthStateInCookie: false, 
+            }
+        };
+
+        const myMSALObj = new msal.PublicClientApplication(msalConfig);
+
+        function handleResponse(resp) {
+            if (resp !== null) {
+                var accountObj = myMSALObj.getAccountByUsername(resp.account.username);
+                var claims = resp.idTokenClaims;
+                sessionStorage.setItem('given_name', claims.given_name);
+                sessionStorage.setItem('email', claims.email);
+
+                // Add the given_name to the page title
+                document.title = claims.given_name + "'s Page";
+
+                // Set the greeting
+                document.getElementById('greeting').textContent = 'Hello, ' + claims.given_name;
+            } else {
+                var accountObj = myMSALObj.getAllAccounts()[0];
+                if (accountObj != null) {
+                    var claims = accountObj.idTokenClaims;
+                    sessionStorage.setItem('given_name', claims.given_name);
+                    sessionStorage.setItem('email', claims.email);
+
+                    // Add the given_name to the page title (as a fallback, if the user just refreshed the page and we don't have the given_name)
+                    document.title = claims.given_name + "'s Page";
+
+                    // Set the greeting
+                    if (sessionStorage.getItem('given_name')) {
+                        document.getElementById('greeting').textContent = 'Hello, ' + sessionStorage.getItem('given_name');
+                    }
+                }
+            }
+        }
+
+        document.getElementById("login").addEventListener("click", function () {
+            myMSALObj.loginRedirect();
+        });
+
+        myMSALObj.handleRedirectPromise().then(handleResponse).catch(function (error) {
+            console.log(error);
+        });
+
+        document.getElementById("logout").addEventListener("click", function () {
+            myMSALObj.logout();
+            sessionStorage.clear();
+
+            // Change the title back to the default
+            document.title = "My Page";
+
+            // Clear the greeting
+            document.getElementById('greeting').textContent = '';
+        });
+    </script>
 </body>
 </html>
