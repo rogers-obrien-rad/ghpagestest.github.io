@@ -1,58 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My Page</title>
+    <title>Login Page</title>
     <script src="https://alcdn.msauth.net/browser/2.13.1/js/msal-browser.min.js"></script>
     <style>
-        .menu {
+        .content {
+            height: 100vh;
             display: flex;
-            justify-content: space-around;
-            background-color: #f0f0f0;
-            padding: 10px;
-        }
-        .full-width-image {
-            width: 100%;
-        }
-        .grey-line {
-            border-top: 1px solid grey;
-            width: 100%;
-        }
-        .banner {
-            height: 200px;
-            width: 100%;
-            background-color: #c0c0c0;
-        }
-        .column-container {
-            display: flex;
-            justify-content: space-around;
-        }
-        .column {
-            width: calc(100% / 3);
-            height: 400px;
-            background-color: #e0e0e0;
-            margin: 10px;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
         }
     </style>
 </head>
 <body>
-    <div id="greeting" style="text-align: center;"></div>
-
-    <div class="menu">
-        <button id="login">Log In</button>
-        <button id="logout">Log Out</button>
-        <!-- Add your additional buttons here -->
-    </div>
-
-    <img src="your-image-url" class="full-width-image" alt="Full screen image">
-
-    <hr class="grey-line">
-
-    <div class="banner"></div>
-
-    <div class="column-container">
-        <div class="column"></div>
-        <div class="column"></div>
-        <div class="column"></div>
+    <div class="content">
+        <button id="login">Log in for awesomeness.</button>
     </div>
 
     <script>
@@ -70,53 +33,8 @@
 
         const myMSALObj = new msal.PublicClientApplication(msalConfig);
 
-        function handleResponse(resp) {
-            if (resp !== null) {
-                var accountObj = myMSALObj.getAccountByUsername(resp.account.username);
-                var claims = resp.idTokenClaims;
-                sessionStorage.setItem('given_name', claims.given_name);
-                sessionStorage.setItem('email', claims.email);
-
-                // Add the given_name to the page title
-                document.title = claims.given_name + "'s Page";
-
-                // Set the greeting
-                document.getElementById('greeting').textContent = 'Hello, ' + claims.given_name;
-            } else {
-                var accountObj = myMSALObj.getAllAccounts()[0];
-                if (accountObj != null) {
-                    var claims = accountObj.idTokenClaims;
-                    sessionStorage.setItem('given_name', claims.given_name);
-                    sessionStorage.setItem('email', claims.email);
-
-                    // Add the given_name to the page title (as a fallback, if the user just refreshed the page and we don't have the given_name)
-                    document.title = claims.given_name + "'s Page";
-
-                    // Set the greeting
-                    if (sessionStorage.getItem('given_name')) {
-                        document.getElementById('greeting').textContent = 'Hello, ' + sessionStorage.getItem('given_name');
-                    }
-                }
-            }
-        }
-
         document.getElementById("login").addEventListener("click", function () {
             myMSALObj.loginRedirect();
-        });
-
-        myMSALObj.handleRedirectPromise().then(handleResponse).catch(function (error) {
-            console.log(error);
-        });
-
-        document.getElementById("logout").addEventListener("click", function () {
-            myMSALObj.logout();
-            sessionStorage.clear();
-
-            // Change the title back to the default
-            document.title = "My Page";
-
-            // Clear the greeting
-            document.getElementById('greeting').textContent = '';
         });
     </script>
 </body>
