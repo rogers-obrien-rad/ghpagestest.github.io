@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Second Page</title>
+    <script src="https://alcdn.msauth.net/browser/2.13.1/js/msal-browser.min.js"></script>
+    <style>
+        .menu {
+            display: flex;
+            justify-content: space-around;
+            background-color: #f0f0f0;
+            padding: 10px;
+        }
+        .full-width-image {
+            width: 100%;
+        }
+        .banner {
+            height: 200px;
+            width: 100%;
+            background-color: #c0c0c0;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu">
+        <button>Button 1</button>
+        <button>Button 2</button>
+        <button>Button 3</button>
+        <button>Button 4</button>
+        <button>Button 5</button>
+    </div>
+
+    <img src="your-image-url" class="full-width-image" alt="Full screen image">
+
+    <div class="banner"></div>
+
+    <script>
+        const msalConfig = {
+            auth: {
+                clientId: '4e33a7bf-6b73-4038-8eee-d411867a951c', // this is the Application (client) ID of your registered Azure application
+                authority: 'https://login.microsoftonline.com/0c86cb28-8440-4de3-837a-3d05a1725da1', // replace 'your-tenant-id' with your Azure AD tenant ID
+                redirectUri: 'https://your-website.com/second-page.html',
+            },
+            cache: {
+                cacheLocation: "sessionStorage",
+                storeAuthStateInCookie: false,
+            }
+        };
+
+        const myMSALObj = new msal.PublicClientApplication(msalConfig);
+
+        function handleResponse(resp) {
+            if (resp !== null) {
+                var accountObj = myMSALObj.getAccountByUsername(resp.account.username);
+                var claims = resp.idTokenClaims;
+                sessionStorage.setItem('given_name', claims.given_name);
+                sessionStorage.setItem('email', claims.email);
+                // and other code to update the page
+            }
+        }
+
+        myMSALObj.handleRedirectPromise().then(handleResponse).catch(function (error) {
+            console.log(error);
+        });
+    </script>
+</body>
+</html>
